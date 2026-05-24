@@ -1,13 +1,36 @@
-// ==================== ADMIN MAIN - NAVIGATION CONTROLLER ====================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check token first
+    if (!getToken()) {
+        window.location.href = '/login';
+        return;
+    }
+
+    // Check if user is SUPER_ADMIN
+    try {
+        const profile = await apiCall('/user/profile');
+        if (!profile || profile.role?.name?.toUpperCase() !== 'ADMIN') {
+            window.location.href = '/main';
+            return;
+        }
+    } catch (error) {
+        window.location.href = '/login';
+        return;
+    }
+
+    // User is authorized — give other scripts time to register their renderers
+    setTimeout(() => {
+        initializeNavigation();
+    }, 100);
+});
 
 let currentSection = 'endpoints';
 let autoRefreshInterval = null;
 
 // Section renderer registry
 const sectionRenderers = {
-    'endpoints': null, // Will be set by admin-endpoints.js
-    'active-users': null, // Will be set by admin-active-users.js
-    'org-activity': null // Will be set by admin-org-activity.js
+    'endpoints': null,
+    'active-users': null,
+    'org-activity': null
 };
 
 // Register a section renderer
@@ -67,7 +90,6 @@ function showLoading() {
 
 // Initialize navigation
 function initializeNavigation() {
-    // Add click listeners to nav items
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
@@ -79,19 +101,6 @@ function initializeNavigation() {
     // Load initial section
     navigateToSection('endpoints');
 }
-
-// Wait for all scripts to load
-window.addEventListener('load', () => {
-    if (typeof apiCall === 'function') {
-        // Give other scripts time to register
-        setTimeout(() => {
-            initializeNavigation();
-        }, 100);
-    } else {
-        console.error('apiCall not found - make sure token-refresh.js is loaded first');
-        showEmptyState('Failed to initialize. Please refresh the page.', '⚠️');
-    }
-});
 
 // Export functions for other modules
 window.registerSectionRenderer = registerSectionRenderer;
