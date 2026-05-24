@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // User is authorized — give other scripts time to register their renderers
+    // User is authorized — show page and initialize
+    document.body.style.display = '';
     setTimeout(() => {
         initializeNavigation();
     }, 100);
