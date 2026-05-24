@@ -1,3 +1,4 @@
-/home    /home/home.html    200
-/login   /login/login.html  200
-/main    /main/main.html    200
+/home    /home/index.html    200
+/login   /login/index.html   200
+/main    /main/index.html    200
+/admin   /admin/index.html   200

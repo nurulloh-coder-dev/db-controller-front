@@ -5,11 +5,9 @@ const AGENT_VERSIONS_API_URL = '/jar/admin';
 // Format bytes to readable size
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
-
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
@@ -64,10 +62,10 @@ function renderVersionCards(versions, isNew = false) {
                 </div>
             ` : `
                 <div class="version-actions">
-                    <button class="action-btn edit-btn" onclick="editVersion('${version.id}')">
+                    <button class="action-btn edit-btn" onclick="openEditModal('${version.id}', '${version.version}', ${JSON.stringify(version.description || '').replace(/'/g, "\\'")})">
                         ✎ Edit
                     </button>
-                    <button class="action-btn delete-btn" onclick="deleteVersion('${version.id}')">
+                    <button class="action-btn delete-btn" onclick="openDeleteModal('${version.id}', '${version.version}')">
                         🗑 Delete
                     </button>
                 </div>
@@ -84,7 +82,6 @@ function renderAgentVersions(data) {
     newVersionsContainer.innerHTML = renderVersionCards(data.newVersions, true);
     approvedVersionsContainer.innerHTML = renderVersionCards(data.approvedVersions, false);
 
-    // Update counts
     document.getElementById('newVersionsCount').textContent = data.newVersions?.length || 0;
     document.getElementById('approvedVersionsCount').textContent = data.approvedVersions?.length || 0;
 }
@@ -94,10 +91,7 @@ async function loadAgentVersionsData() {
     try {
         renderAgentVersionsSection();
 
-        const data = await apiCall(AGENT_VERSIONS_API_URL, {
-            method: 'GET'
-        });
-
+        const data = await apiCall(AGENT_VERSIONS_API_URL, { method: 'GET' });
         renderAgentVersions(data);
 
     } catch (error) {
@@ -118,7 +112,8 @@ async function loadAgentVersionsData() {
     }
 }
 
-// Open approve modal
+// ==================== APPROVE MODAL ====================
+
 function openApproveModal(version) {
     const modal = document.getElementById('approveModal');
     document.getElementById('approveVersionNumber').textContent = version;
@@ -127,33 +122,27 @@ function openApproveModal(version) {
     modal.style.display = 'flex';
 }
 
-// Close approve modal
 function closeApproveModal() {
-    const modal = document.getElementById('approveModal');
-    modal.style.display = 'none';
+    document.getElementById('approveModal').style.display = 'none';
 }
 
-// Approve version
 async function approveVersion() {
     const version = document.getElementById('approveVersionInput').value;
     const description = document.getElementById('approveDescription').value.trim();
-
     const submitBtn = document.getElementById('approveSubmitBtn');
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Approving...';
 
     try {
-        const response = await apiCall('/jar', {
+        await apiCall('/jar', {
             method: 'POST',
-            body: JSON.stringify({
-                version: version,
-                description: description || null
-            })
+            body: JSON.stringify({ version, description: description || null })
         });
 
         showToast('Version approved successfully!', 'success');
         closeApproveModal();
-        loadAgentVersionsData(); // Refresh the list
+        loadAgentVersionsData();
 
     } catch (error) {
         console.error('Error approving version:', error);
@@ -163,23 +152,90 @@ async function approveVersion() {
     }
 }
 
-// Placeholder functions for actions (to be implemented)
-function rejectVersion(version) {
-    showToast('Reject functionality coming soon: ' + version, 'error');
-    console.log('Reject version:', version);
+// ==================== EDIT MODAL ====================
+
+function openEditModal(id, version, description) {
+    const modal = document.getElementById('editModal');
+    document.getElementById('editVersionId').value = id;
+    document.getElementById('editVersionNumber').textContent = version;
+    document.getElementById('editVersionDisplay').value = version;
+    document.getElementById('editDescription').value = description || '';
+    modal.style.display = 'flex';
 }
 
-function editVersion(id) {
-    showToast('Edit functionality coming soon: ' + id, 'error');
-    console.log('Edit version:', id);
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
 }
 
-function deleteVersion(id) {
-    showToast('Delete functionality coming soon: ' + id, 'error');
-    console.log('Delete version:', id);
+async function submitEditVersion() {
+    const id = document.getElementById('editVersionId').value;
+    const version = document.getElementById('editVersionDisplay').value.trim();
+    const description = document.getElementById('editDescription').value.trim();
+    const submitBtn = document.getElementById('editSubmitBtn');
+
+    if (!version) {
+        showToast('Version number is required.', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    try {
+        await apiCall(`/jar/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ version, description: description || null })
+        });
+
+        showToast('Version updated successfully!', 'success');
+        closeEditModal();
+        loadAgentVersionsData();
+
+    } catch (error) {
+        console.error('Error updating version:', error);
+        showToast('Failed to update version: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Changes';
+    }
 }
 
-// Render agent versions section
+// ==================== DELETE MODAL ====================
+
+function openDeleteModal(id, version) {
+    const modal = document.getElementById('deleteModal');
+    document.getElementById('deleteVersionId').value = id;
+    document.getElementById('deleteVersionNumber').textContent = version;
+    modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+async function confirmDeleteVersion() {
+    const id = document.getElementById('deleteVersionId').value;
+    const confirmBtn = document.getElementById('deleteConfirmBtn');
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Deleting...';
+
+    try {
+        await apiCall(`/jar/${id}`, { method: 'DELETE' });
+
+        showToast('Version deleted successfully!', 'success');
+        closeDeleteModal();
+        loadAgentVersionsData();
+
+    } catch (error) {
+        console.error('Error deleting version:', error);
+        showToast('Failed to delete version: ' + error.message, 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Delete';
+    }
+}
+
+// ==================== RENDER SECTION ====================
+
 function renderAgentVersionsSection() {
     const mainContent = document.getElementById('mainContent');
 
@@ -198,9 +254,7 @@ function renderAgentVersionsSection() {
                 <h2>🆕 New Versions</h2>
                 <span class="version-count" id="newVersionsCount">0</span>
             </div>
-            <div class="versions-grid" id="newVersionsGrid">
-                <!-- Will be populated by JavaScript -->
-            </div>
+            <div class="versions-grid" id="newVersionsGrid"></div>
         </div>
 
         <!-- Approved Versions Section -->
@@ -209,9 +263,7 @@ function renderAgentVersionsSection() {
                 <h2>✅ Approved Versions</h2>
                 <span class="version-count" id="approvedVersionsCount">0</span>
             </div>
-            <div class="versions-grid" id="approvedVersionsGrid">
-                <!-- Will be populated by JavaScript -->
-            </div>
+            <div class="versions-grid" id="approvedVersionsGrid"></div>
         </div>
 
         <!-- Approve Modal -->
@@ -225,12 +277,7 @@ function renderAgentVersionsSection() {
                     <input type="hidden" id="approveVersionInput">
                     <div class="form-group">
                         <label for="approveDescription">Description (Optional)</label>
-                        <textarea 
-                            id="approveDescription" 
-                            class="form-textarea" 
-                            placeholder="Add a description for this version..."
-                            rows="4"
-                        ></textarea>
+                        <textarea id="approveDescription" class="form-textarea" placeholder="Add a description for this version..." rows="4"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -239,10 +286,55 @@ function renderAgentVersionsSection() {
                 </div>
             </div>
         </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal" class="modal-overlay" onclick="if(event.target === this) closeEditModal()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Version <span id="editVersionNumber"></span></h3>
+                    <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editVersionId">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="editVersionDisplay">Version Number</label>
+                        <input type="text" id="editVersionDisplay" class="form-textarea" style="resize:none; height:auto; padding: 10px 12px;" placeholder="e.g. 1.0.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription">Description</label>
+                        <textarea id="editDescription" class="form-textarea" placeholder="Add a description..." rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn cancel-btn" onclick="closeEditModal()">Cancel</button>
+                    <button class="modal-btn approve-btn" id="editSubmitBtn" onclick="submitEditVersion()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 2px 8px rgba(245,158,11,0.3);">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal-overlay" onclick="if(event.target === this) closeDeleteModal()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Delete Version <span id="deleteVersionNumber" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></span></h3>
+                    <button class="modal-close-btn" onclick="closeDeleteModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteVersionId">
+                    <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0;">
+                        Are you sure you want to delete this version? This action <strong>cannot be undone</strong>.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                    <button class="modal-btn" id="deleteConfirmBtn" onclick="confirmDeleteVersion()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; box-shadow: 0 2px 8px rgba(239,68,68,0.3);">Delete</button>
+                </div>
+            </div>
+        </div>
     `;
 }
 
-// Register this section with main navigation immediately
+// Register section
 window.registerSectionRenderer = window.registerSectionRenderer || function() {};
 registerSectionRenderer('agent-versions', loadAgentVersionsData);
 
@@ -250,5 +342,9 @@ registerSectionRenderer('agent-versions', loadAgentVersionsData);
 window.openApproveModal = openApproveModal;
 window.closeApproveModal = closeApproveModal;
 window.approveVersion = approveVersion;
-window.editVersion = editVersion;
-window.deleteVersion = deleteVersion;
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.submitEditVersion = submitEditVersion;
+window.openDeleteModal = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.confirmDeleteVersion = confirmDeleteVersion;
