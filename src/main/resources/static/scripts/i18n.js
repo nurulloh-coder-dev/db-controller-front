@@ -122,6 +122,7 @@ const translations = {
                 enterCurrent: "Please enter your current password",
                 enterNew: "Please enter a new password",
                 minLength: "Password must be at least 6 characters",
+                invalidChars: "Use only letters, digits and these symbols: ! @ # % ^ & * ( ) _ + = . , : ? ~ -",
                 updateSuccess: "Password updated successfully",
                 updateError: "Failed to update password",
                 verificationError: "Password verification failed"
@@ -804,6 +805,7 @@ const translations = {
                 enterCurrent: "Пожалуйста, введите текущий пароль",
                 enterNew: "Пожалуйста, введите новый пароль",
                 minLength: "Пароль должен содержать не менее 6 символов",
+                invalidChars: "Используйте только латинские буквы, цифры и символы: ! @ # % ^ & * ( ) _ + = . , : ? ~ -",
                 updateSuccess: "Пароль успешно обновлён",
                 updateError: "Не удалось обновить пароль",
                 verificationError: "Ошибка проверки пароля"
@@ -1470,6 +1472,7 @@ const translations = {
                 enterCurrent: "Iltimos, joriy parolni kiriting",
                 enterNew: "Iltimos, yangi parolni kiriting",
                 minLength: "Parol kamida 6 ta belgidan iborat bo'lishi kerak",
+                invalidChars: "Faqat lotin harflari, raqamlar va quyidagi belgilardan foydalaning: ! @ # % ^ & * ( ) _ + = . , : ? ~ -",
                 updateSuccess: "Parol muvaffaqiyatli yangilandi",
                 updateError: "Parolni yangilab bo'lmadi",
                 verificationError: "Parolni tekshirishda xatolik"

@@ -271,6 +271,12 @@ async function saveNewPassword() {
         return;
     }
 
+    // must match the backend rule; the agent embeds this password in SQL
+    if (!/^[A-Za-z0-9!@#%^&*()_+=.,:?~-]{6,64}$/.test(newPassword)) {
+        showToast(window.t('main.passwordChange.invalidChars'), 'error');
+        return;
+    }
+
     // Disable button and show loading
     const originalContent = saveBtn.innerHTML;
     saveBtn.disabled = true;
