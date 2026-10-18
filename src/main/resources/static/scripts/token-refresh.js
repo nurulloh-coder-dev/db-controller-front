@@ -110,6 +110,17 @@ function saveTokens(loginResponse) {
 function clearTokensAndLogout(message = 'Session expired. Please login again.') {
     console.log('Clearing tokens and logging out:', message);
 
+    // revoke the refresh token on the server (best effort; the page leaves either way)
+    const refreshToken = sessionStorage.getItem('refreshToken');
+    if (refreshToken) {
+        fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+            keepalive: true
+        }).catch(() => {});
+    }
+
     // Clear all auth-related data
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('refreshToken');
@@ -149,11 +160,13 @@ async function refreshAccessToken() {
         try {
             console.log('🔄 Refreshing access token...');
 
-            const response = await fetch(`${API_BASE}/auth/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}`, {
+            // in the body, not the URL: URLs end up in server and proxy logs
+            const response = await fetch(`${API_BASE}/auth/refresh-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ refreshToken })
             });
 
             if (!response.ok) {
