@@ -3,6 +3,23 @@
 
 const API_BASE = 'https://db-controller-production.up.railway.app/api/v1';
 
+// ==================== HTML ESCAPING ====================
+// Use for every server/user supplied value placed into innerHTML templates.
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Safe JS string literal for inline handlers, e.g. onclick="copy(${jsArg(value)})"
+function jsArg(value) {
+    return escapeHtml(JSON.stringify(String(value ?? '')));
+}
+
 // Flag to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
 let refreshPromise = null;
@@ -327,7 +344,7 @@ function showToast(message, type = 'success', duration = 3000) {
 
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
-        <div class="toast-message">${message}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
         <button class="toast-close" onclick="this.parentElement.remove()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>

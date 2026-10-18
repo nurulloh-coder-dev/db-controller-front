@@ -260,7 +260,7 @@ function displayVersionsDropdown(versions) {
         // Format option text with version, size, and date
         const sizeText = formatFileSize(version.sizeInBytes);
         const dateText = formatDate(version.releaseDate);
-        option.textContent = `DB Agent v${version.version} - ${sizeText} - ${dateText}`;
+        option.textContent = `DB Agent v${escapeHtml(version.version)} - ${sizeText} - ${dateText}`;
 
         selectElement.appendChild(option);
     });
@@ -459,8 +459,8 @@ function displayHistory(history) {
     // Generate table rows
     const historyRows = sortedHistory.map(item => `
         <tr>
-            <td>${item.versionName}</td>
-            <td>${item.downloadedBy}</td>
+            <td>${escapeHtml(item.versionName)}</td>
+            <td>${escapeHtml(item.downloadedBy)}</td>
             <td>${formatDateTime(item.downloadDate)}</td>
         </tr>
     `).join('');

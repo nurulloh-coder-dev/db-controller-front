@@ -168,7 +168,7 @@ function createDatabaseCard(db) {
 
     card.innerHTML = `
             <div class="database-card-header">
-            <div class="database-card-name">${db.name}</div>
+            <div class="database-card-name">${escapeHtml(db.name)}</div>
         </div>
     
         <div class="database-members">
@@ -214,7 +214,7 @@ function createDatabaseCard(db) {
                     </svg>
                 </button>
                 ` : ''}
-                <span class="member-name-text">${member.username ? member.username : window.t('databases.memberModal.unknownUser')}</span>
+                <span class="member-name-text">${escapeHtml(member.username ? member.username : window.t('databases.memberModal.unknownUser'))}</span>
                 <div class="member-actions">
                     <button class="member-action-btn member-edit-btn" title="${window.t('databases.card.editMember')}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -277,7 +277,7 @@ function openMemberModal(member, database = null) {
     const authUser = member.authUserDto || {};
 
     const leftContent = `
-        <h2>${authUser.name || window.t('databases.memberModal.unknownUser')}</h2>
+        <h2>${escapeHtml(authUser.name || window.t('databases.memberModal.unknownUser'))}</h2>
         
         <div class="auth-user-info">
             <div class="auth-info-item">
@@ -287,7 +287,7 @@ function openMemberModal(member, database = null) {
                 </svg>
                 <div class="auth-info-content">
                     <div class="auth-info-label">${window.t('databases.memberModal.username')}</div>
-                    <div class="auth-info-value">${authUser.username || window.t('databases.memberModal.na')}</div>
+                    <div class="auth-info-value">${escapeHtml(authUser.username || window.t('databases.memberModal.na'))}</div>
                 </div>
             </div>
             
@@ -298,7 +298,7 @@ function openMemberModal(member, database = null) {
                 </svg>
                 <div class="auth-info-content">
                     <div class="auth-info-label">${window.t('databases.memberModal.email')}</div>
-                    <div class="auth-info-value">${authUser.email || window.t('databases.memberModal.na')}</div>
+                    <div class="auth-info-value">${escapeHtml(authUser.email || window.t('databases.memberModal.na'))}</div>
                 </div>
             </div>
             
@@ -308,14 +308,14 @@ function openMemberModal(member, database = null) {
                 </svg>
                 <div class="auth-info-content">
                     <div class="auth-info-label">${window.t('databases.memberModal.phone')}</div>
-                    <div class="auth-info-value">${authUser.phone || window.t('databases.memberModal.na')}</div>
+                    <div class="auth-info-value">${escapeHtml(authUser.phone || window.t('databases.memberModal.na'))}</div>
                 </div>
             </div>
         </div>
         
         <div class="role-badge-large">
             <div class="auth-info-label">${window.t('databases.memberModal.role')}</div>
-            <div class="auth-info-value">${authUser.role ? authUser.role.name : window.t('databases.memberModal.na')}</div>
+            <div class="auth-info-value">${escapeHtml(authUser.role ? authUser.role.name : window.t('databases.memberModal.na'))}</div>
         </div>
         
         ${!member.authUserDto ? `
@@ -349,8 +349,8 @@ function openMemberModal(member, database = null) {
     const rolesHtml = member.roles && member.roles.length > 0
         ? member.roles.map(role => `
             <div class="db-role-item">
-                <h4>${role.name}</h4>
-                <p>${role.description || window.t('databases.memberModal.noDescription')}</p>
+                <h4>${escapeHtml(role.name)}</h4>
+                <p>${escapeHtml(role.description || window.t('databases.memberModal.noDescription'))}</p>
             </div>
         `).join('')
         : `<p style="color: #64748b; text-align: center; padding: 20px;">${window.t('databases.memberModal.noRolesAssigned')}</p>`;
@@ -361,7 +361,7 @@ function openMemberModal(member, database = null) {
         <div class="db-user-info">
             <div class="db-username-display">
                 <div class="db-username-label">${window.t('databases.memberModal.databaseUsername')}</div>
-                <div class="db-username-value">${member.username || window.t('databases.memberModal.na')}</div>
+                <div class="db-username-value">${escapeHtml(member.username || window.t('databases.memberModal.na'))}</div>
             </div>
         </div>
         
@@ -464,7 +464,7 @@ function openAddMemberModal(database) {
     selectedRoles = [];
     selectedAdditionalDatabases = [];
 
-    document.getElementById('addMemberModalTitle').textContent = `Add Member to ${database.name}`;
+    document.getElementById('addMemberModalTitle').textContent = `Add Member to ${escapeHtml(database.name)}`;
     document.getElementById('addMemberModalOverlay').style.display = 'flex';
     updateAddMemberModalTranslations();
 
@@ -553,8 +553,8 @@ function renderUserList(users) {
         }
 
         userItem.innerHTML = `
-            <div class="user-item-name">${user.name}</div>
-            <div class="user-item-details">@${user.username} • ${user.email}</div>
+            <div class="user-item-name">${escapeHtml(user.name)}</div>
+            <div class="user-item-details">@${escapeHtml(user.username)} • ${escapeHtml(user.email)}</div>
         `;
 
         userItem.addEventListener('click', () => selectUser(user));
@@ -650,7 +650,7 @@ function renderAdditionalDatabases() {
         const isChecked = selectedAdditionalDatabases.includes(db.id);
         dbCheckbox.innerHTML = `
             <input type="checkbox" value="${db.id}" ${isChecked ? 'checked' : ''}>
-            <span class="database-checkbox-label">${db.name}</span>
+            <span class="database-checkbox-label">${escapeHtml(db.name)}</span>
         `;
 
         const checkbox = dbCheckbox.querySelector('input');
@@ -752,8 +752,8 @@ function renderSelectedRoles() {
         roleItem.classList.add('selected-role-item');
 
         roleItem.innerHTML = `
-            <div class="role-item-name">${role.name}</div>
-            <div class="role-item-description">${role.description || 'No description'}</div>
+            <div class="role-item-name">${escapeHtml(role.name)}</div>
+            <div class="role-item-description">${escapeHtml(role.description || 'No description')}</div>
             <button class="remove-role-btn" title="Remove role">×</button>
         `;
 
@@ -818,8 +818,8 @@ function renderRolesExpandModal() {
 
         roleItem.innerHTML = `
             <div class="role-item-content">
-                <div class="role-item-name">${role.name}</div>
-                <div class="role-item-description">${role.description || 'No description'}</div>
+                <div class="role-item-name">${escapeHtml(role.name)}</div>
+                <div class="role-item-description">${escapeHtml(role.description || 'No description')}</div>
             </div>
             ${isSelected ? '<span class="role-selected-badge">✓ Selected</span>' : ''}
         `;
@@ -899,8 +899,8 @@ function renderEditSelectedRoles() {
         roleItem.classList.add('selected-role-item');
 
         roleItem.innerHTML = `
-            <div class="role-item-name">${role.name}</div>
-            <div class="role-item-description">${role.description || 'No description'}</div>
+            <div class="role-item-name">${escapeHtml(role.name)}</div>
+            <div class="role-item-description">${escapeHtml(role.description || 'No description')}</div>
             <button class="remove-role-btn" title="Remove role">×</button>
         `;
 
@@ -1024,8 +1024,8 @@ function renderEditRolesExpandModal() {
 
         roleItem.innerHTML = `
             <div class="role-item-content">
-                <div class="role-item-name">${role.name}</div>
-                <div class="role-item-description">${role.description || 'No description'}</div>
+                <div class="role-item-name">${escapeHtml(role.name)}</div>
+                <div class="role-item-description">${escapeHtml(role.description || 'No description')}</div>
             </div>
             ${isSelected ? '<span class="role-selected-badge">✓ Selected</span>' : ''}
         `;
@@ -1246,10 +1246,10 @@ function renderAttachUserList(users) {
 
         userItem.innerHTML = `
             <div class="attach-user-item-info">
-                <div class="attach-user-item-name">${user.name}</div>
-                <div class="attach-user-item-username">@${user.username}</div>
+                <div class="attach-user-item-name">${escapeHtml(user.name)}</div>
+                <div class="attach-user-item-username">@${escapeHtml(user.username)}</div>
             </div>
-            <div class="attach-user-item-email">${user.email}</div>
+            <div class="attach-user-item-email">${escapeHtml(user.email)}</div>
         `;
 
         userItem.addEventListener('click', () => selectAttachUser(user));

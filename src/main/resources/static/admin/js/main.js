@@ -5,10 +5,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Check if user is SUPER_ADMIN
+    // Platform admin panel: only super admins (organization ADMINs are not enough)
     try {
         const profile = await apiCall('/user/profile');
-        if (!profile || profile.role?.name?.toUpperCase() !== 'ADMIN') {
+        if (!profile || profile.superAdmin !== true) {
             window.location.href = '/main';
             return;
         }
@@ -74,7 +74,7 @@ function showEmptyState(message = 'No data available', icon = '📭') {
     mainContent.innerHTML = `
         <div class="empty-state">
             <div class="empty-state-icon">${icon}</div>
-            <div class="empty-state-title">${message}</div>
+            <div class="empty-state-title">${escapeHtml(message)}</div>
         </div>
     `;
 }

@@ -35,12 +35,12 @@ function renderVersionCards(versions, isNew = false) {
     return versions.map(version => `
         <div class="version-card ${isNew ? 'version-card-new' : 'version-card-approved'}">
             <div class="version-header">
-                <div class="version-number">v${version.version}</div>
-                ${version.id ? `<div class="version-id">${version.id.substring(0, 8)}</div>` : ''}
+                <div class="version-number">v${escapeHtml(version.version)}</div>
+                ${version.id ? `<div class="version-id">${escapeHtml(version.id.substring(0, 8))}</div>` : ''}
             </div>
             
             <div class="version-description">
-                ${version.description || 'No description available'}
+                ${escapeHtml(version.description || 'No description available')}
             </div>
             
             <div class="version-details">
@@ -56,16 +56,16 @@ function renderVersionCards(versions, isNew = false) {
             
             ${isNew ? `
                 <div class="version-actions">
-                    <button class="action-btn approve-btn" onclick="openApproveModal('${version.version}')">
+                    <button class="action-btn approve-btn" onclick="openApproveModal(${jsArg(version.version)})">
                         ✓ Approve
                     </button>
                 </div>
             ` : `
                 <div class="version-actions">
-                    <button class="action-btn edit-btn" onclick="openEditModal('${version.id}', '${version.version}', ${JSON.stringify(version.description || '').replace(/'/g, "\\'")})">
+                    <button class="action-btn edit-btn" onclick="openEditModal(${jsArg(version.id)}, ${jsArg(version.version)}, ${jsArg(version.description || '')})">
                         ✎ Edit
                     </button>
-                    <button class="action-btn delete-btn" onclick="openDeleteModal('${version.id}', '${version.version}')">
+                    <button class="action-btn delete-btn" onclick="openDeleteModal(${jsArg(version.id)}, ${jsArg(version.version)})">
                         🗑 Delete
                     </button>
                 </div>
@@ -106,7 +106,7 @@ async function loadAgentVersionsData() {
             <div class="empty-state">
                 <div class="empty-state-icon">⚠️</div>
                 <div class="empty-state-title">Error Loading Data</div>
-                <div class="empty-state-description">${error.message}</div>
+                <div class="empty-state-description">${escapeHtml(error.message)}</div>
             </div>
         `;
     }
