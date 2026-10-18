@@ -23,7 +23,7 @@ function showToast(message, type = 'success', duration = 3000) {
 
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
-        <div class="toast-message">${message}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
         <button class="toast-close" onclick="this.parentElement.remove()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -79,6 +79,8 @@ function updateSettingsPageTranslations() {
 // ==================== CHANGE PASSWORD FUNCTIONALITY ====================
 
 let passwordAttempts = 0;
+// kept between step 1 and step 2: the server needs the current password to accept a new one
+let verifiedCurrentPassword = null;
 const MAX_PASSWORD_ATTEMPTS = 5;
 
 function handleChangePassword() {
@@ -365,14 +367,13 @@ async function verifyCurrentPassword() {
     button.innerHTML = '<span>Verifying...</span>';
 
     try {
-        const encodedPassword = btoa(currentPassword);
-
-        const response = await fetch(`https://db-controller-production.up.railway.app/api/v1/user/password?password=${encodeURIComponent(encodedPassword)}`, {
-            method: 'GET',
+        const response = await fetch(`${API_BASE}/user/password/check`, {
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${getToken()}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ password: currentPassword })
         });
 
         if (!response.ok) {
@@ -383,6 +384,7 @@ async function verifyCurrentPassword() {
 
         if (isValid) {
             passwordAttempts = 0;
+            verifiedCurrentPassword = currentPassword;
             showStep2();
             showToast('Password verified successfully!', 'success');
         } else {
@@ -468,6 +470,7 @@ function goBackToStep1() {
     if (step2) step2.classList.remove('active');
     if (step1) step1.classList.add('active');
     if (currentPasswordInput) currentPasswordInput.value = '';
+    verifiedCurrentPassword = null;
     if (attemptsWarning) attemptsWarning.style.display = 'none';
 
     setTimeout(() => {
@@ -538,23 +541,21 @@ async function saveNewAccountPassword(event) {
     button.innerHTML = `<span>${t('settingsPage.passwordModal.step2.saving')}</span>`;
 
     try {
-        const encodedPassword = btoa(unescape(encodeURIComponent(newPassword)));
-
-        const response = await fetch(
-            `https://db-controller-production.up.railway.app/api/v1/user/password?password=${encodeURIComponent(encodedPassword)}`,
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+        const response = await fetch(`${API_BASE}/user/password`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ currentPassword: verifiedCurrentPassword, newPassword })
+        });
 
         if (!response.ok) throw new Error('Failed to update password');
 
+        verifiedCurrentPassword = null;
         showToast(t('settingsPage.passwordModal.toasts.success'), 'success');
-        setTimeout(() => closePasswordModal(), 1500);
+        // the server signs out every session on a password change, including this one
+        setTimeout(() => clearTokensAndLogout('Password changed. Please log in again.'), 1500);
 
     } catch (error) {
         console.error('❌ Account password update failed:', error);

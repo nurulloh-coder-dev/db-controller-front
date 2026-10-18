@@ -79,8 +79,8 @@ function renderEndpointsTable(data) {
 
         row.innerHTML = `
             <td class="rank-cell">#${index + 1}</td>
-            <td><span class="method-badge method-${endpoint.method}">${endpoint.method}</span></td>
-            <td class="path-cell">${endpoint.path}</td>
+            <td><span class="method-badge method-${escapeHtml(endpoint.method)}">${escapeHtml(endpoint.method)}</span></td>
+            <td class="path-cell">${escapeHtml(endpoint.path)}</td>
             <td class="response-time ${responseClass}">${endpoint.avgResponseTime}ms</td>
             <td><span class="expand-icon">▶</span></td>
         `;
@@ -191,7 +191,7 @@ async function loadEndpointsData(useInstant = false) {
             <div class="empty-state">
                 <div class="empty-state-icon">${errorIcon}</div>
                 <div class="empty-state-title">Error Loading Data</div>
-                <div class="empty-state-description">${errorMessage}</div>
+                <div class="empty-state-description">${escapeHtml(errorMessage)}</div>
             </div>
         `;
     }

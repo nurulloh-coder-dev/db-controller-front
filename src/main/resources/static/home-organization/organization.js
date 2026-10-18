@@ -14,6 +14,15 @@ function createToastContainer() {
     return container;
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function showToast(message, type = 'info', duration = 5000) {
     const container = createToastContainer();
 
@@ -38,7 +47,7 @@ function showToast(message, type = 'info', duration = 5000) {
         <div class="toast-icon">${icons[type] || icons.info}</div>
         <div class="toast-content">
             <div class="toast-title">${titles[type]}</div>
-            <div class="toast-message">${message}</div>
+            <div class="toast-message">${escapeHtml(message)}</div>
         </div>
         <button class="toast-close" onclick="this.closest('.toast').classList.add('removing'); setTimeout(() => this.closest('.toast').remove(), 300)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

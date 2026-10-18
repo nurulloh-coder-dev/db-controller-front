@@ -56,20 +56,20 @@ function renderUsersTable(users) {
         <tr>
             <td>
                 <div class="user-info">
-                    <div class="user-avatar">${getUserInitials(user.userName)}</div>
+                    <div class="user-avatar">${escapeHtml(getUserInitials(user.userName))}</div>
                     <div class="user-details">
-                        <div class="user-name">${user.userName}</div>
-                        <div class="user-email">${user.email}</div>
+                        <div class="user-name">${escapeHtml(user.userName)}</div>
+                        <div class="user-email">${escapeHtml(user.email)}</div>
                     </div>
                 </div>
             </td>
             <td>
-                <span class="org-name">${user.organizationName}</span>
+                <span class="org-name">${escapeHtml(user.organizationName)}</span>
             </td>
             <td>
-                <span class="status-badge status-${user.status}">
+                <span class="status-badge status-${escapeHtml(user.status)}">
                     <span class="status-dot"></span>
-                    ${user.status}
+                    ${escapeHtml(user.status)}
                 </span>
             </td>
             <td>
@@ -130,7 +130,7 @@ async function loadActiveUsersData() {
             <div class="empty-state">
                 <div class="empty-state-icon">⚠️</div>
                 <div class="empty-state-title">Error Loading Data</div>
-                <div class="empty-state-description">${error.message}</div>
+                <div class="empty-state-description">${escapeHtml(error.message)}</div>
             </div>
         `;
     }

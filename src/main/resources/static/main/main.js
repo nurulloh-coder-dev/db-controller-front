@@ -168,7 +168,7 @@ function showToast(message, type = 'success', duration = 3000) {
 
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
-        <div class="toast-message">${message}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
         <button class="toast-close">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -268,6 +268,12 @@ async function saveNewPassword() {
 
     if (newPassword.length < 6) {
         showToast(window.t('main.passwordChange.minLength'), 'error');
+        return;
+    }
+
+    // must match the backend rule; the agent embeds this password in SQL
+    if (!/^[A-Za-z0-9!@#%^&*()_+=.,:?~-]{6,64}$/.test(newPassword)) {
+        showToast(window.t('main.passwordChange.invalidChars'), 'error');
         return;
     }
 
@@ -415,7 +421,7 @@ function renderDatabasesPage(data) {
             <div class="shared-password-field">
                 <label class="credential-label">${t('main.credentials.password')}</label>
                 <div class="credential-value-container">
-                    <span class="credential-value" id="credentialPassword" data-password="${dbPassword || ''}">${t('main.credentials.passwordHidden')}</span>
+                    <span class="credential-value" id="credentialPassword" data-password="${escapeHtml(dbPassword)}">${t('main.credentials.passwordHidden')}</span>
                     <div class="credential-actions">
                         ${dbPassword ? `
                         <button class="credential-btn" id="toggleCredentialPasswordBtn" onclick="toggleCredentialPassword()" title="${t('main.credentials.showPassword')}">
@@ -424,7 +430,7 @@ function renderDatabasesPage(data) {
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </button>
-                        <button class="credential-btn" onclick="copyToClipboard('${(dbPassword || '').replace(/'/g, "\\'")}', this)" title="${t('common.copy')}">
+                        <button class="credential-btn" onclick="copyToClipboard(${jsArg(dbPassword)}, this)" title="${t('common.copy')}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -460,15 +466,15 @@ function renderDatabasesPage(data) {
         databases.forEach(db => {
             databasesHTML += `
                 <div class="database-item">
-                    <h3 class="database-name">${db.databaseName || 'Unknown Database'}</h3>
+                    <h3 class="database-name">${escapeHtml(db.databaseName || 'Unknown Database')}</h3>
                     
                     <!-- Database Username -->
                     <div class="database-username-section">
                         <label class="database-field-label">${t('main.availableDatabases.username')}</label>
                         <div class="database-username-display">
-                            <span class="database-username-value">${db.dbUsername || 'N/A'}</span>
+                            <span class="database-username-value">${escapeHtml(db.dbUsername || 'N/A')}</span>
                             ${db.dbUsername ? `
-                            <button class="database-copy-btn" onclick="copyToClipboard('${db.dbUsername.replace(/'/g, "\\'")}', this)" title="${t('common.copy')}">
+                            <button class="database-copy-btn" onclick="copyToClipboard(${jsArg(db.dbUsername)}, this)" title="${t('common.copy')}">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -485,7 +491,7 @@ function renderDatabasesPage(data) {
                             ${db.roleNames && db.roleNames.length > 0
                 ? db.roleNames.map(role => `
                                     <span class="role-badge" data-role='${JSON.stringify(role).replace(/'/g, "&#39;")}' title="${t('main.availableDatabases.viewRole')}">
-                                        ${role.name}
+                                        ${escapeHtml(role.name)}
                                     </span>
                                 `).join('')
                 : `<span class="no-roles">${t('main.availableDatabases.noRoles')}</span>`

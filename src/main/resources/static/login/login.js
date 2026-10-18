@@ -15,7 +15,7 @@ function showToast(message, type = 'success', duration = 3000) {
 
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
-        <div class="toast-message">${message}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
         <button class="toast-close" onclick="this.parentElement.remove()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>

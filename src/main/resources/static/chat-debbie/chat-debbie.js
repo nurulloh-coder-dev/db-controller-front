@@ -387,11 +387,6 @@ function handleDebbieKeydown(event) {
 
 // ==================== UTILITY ====================
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 // Auto-resize textarea
 document.addEventListener('DOMContentLoaded', () => {
